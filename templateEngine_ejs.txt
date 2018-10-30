@@ -1,0 +1,116 @@
+検索置換を使えば、テキストを
+プログラムの中から置き換えられることは
+わかったが、このやり方はかなり面倒。
+replaceを使って、毎回、検索するテキストと
+置換するテキストを指定していかないといけないため。
+
+｢テンプレート｣というものを使って表示するコンテンツを容易するための仕組み。
+
+EJS
+
+npm install -g ejs
+
+node package manager
+-g global
+Node.js本体にパッケージをインストールため
+どのアプリケーションからでも使える。
+※localもある。
+
+C:\node.js_choNyumon_secondEdition>node 2-11.js
+internal/modules/cjs/loader.js:582
+    throw err;
+    ^
+
+Error: Cannot find module 'ejs'
+    at Function.Module._resolveFilename (internal/modules/cjs/loader.js:580:15)
+    at Function.Module._load (internal/modules/cjs/loader.js:506:25)
+    at Module.require (internal/modules/cjs/loader.js:636:17)
+    at require (internal/modules/cjs/helpers.js:20:18)
+    at Object.<anonymous> (C:\node.js_choNyumon_secondEdition\2-11.js:3:13)
+    at Module._compile (internal/modules/cjs/loader.js:688:30)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:699:10)
+    at Module.load (internal/modules/cjs/loader.js:598:32)
+    at tryModuleLoad (internal/modules/cjs/loader.js:537:12)
+    at Function.Module._load (internal/modules/cjs/loader.js:529:3)
+
+    C:\Program Files\nodejs>npm init
+This utility will walk you through creating a package.json file.
+It only covers the most common items, and tries to guess sensible defaults.
+
+See `npm help json` for definitive documentation on these fields
+and exactly what they do.
+
+Use `npm install <pkg>` afterwards to install a package and
+save it as a dependency in the package.json file.
+
+Press ^C at any time to quit.
+package name: (nodejs) npm install --save ejs
+
+
+権限のあるコマンドプロンプトで実行
+npm install --save ejs
+
+
+下記で成功↓ 作業しているファイルに直接インストール
+
+C:\node.js_choNyumon_secondEdition>npm init
+This utility will walk you through creating a package.json file.
+It only covers the most common items, and tries to guess sensible defaults.
+
+See `npm help json` for definitive documentation on these fields
+and exactly what they do.
+
+Use `npm install <pkg>` afterwards to install a package and
+save it as a dependency in the package.json file.
+
+Press ^C at any time to quit.
+package name: (node.js_chonyumon_secondedition)
+version: (1.0.0)
+description:
+entry point: (2-11.js)
+test command:
+git repository: (https://github.com/fumit35/node.js_choNyumon_secondEdition.git)
+
+keywords:
+author:
+license: (ISC)
+About to write to C:\node.js_choNyumon_secondEdition\package.json:
+
+{
+  "name": "node.js_chonyumon_secondedition",
+  "version": "1.0.0",
+  "description": "",
+  "main": "2-11.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fumit35/node.js_choNyumon_secondEdition.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fumit35/node.js_choNyumon_secondEdition/issues"
+  },
+  "homepage": "https://github.com/fumit35/node.js_choNyumon_secondEdition#readme
+"
+}
+
+
+Is this OK? (yes) yes
+
+C:\node.js_choNyumon_secondEdition>npm install --save ejs
+npm notice created a lockfile as package-lock.json. You should commit this file.
+
+npm WARN node.js_chonyumon_secondedition@1.0.0 No description
+
++ ejs@2.6.1
+added 1 package from 2 contributors and audited 1 package in 1.332s
+found 0 vulnerabilities
+
+
+C:\node.js_choNyumon_secondEdition>node 2-11.js
+Server start!
+
+【ejs】

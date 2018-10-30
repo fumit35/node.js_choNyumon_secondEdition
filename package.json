@@ -1,0 +1,22 @@
+{
+  "name": "node.js_chonyumon_secondedition",
+  "version": "1.0.0",
+  "description": "",
+  "main": "2-11.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fumit35/node.js_choNyumon_secondEdition.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fumit35/node.js_choNyumon_secondEdition/issues"
+  },
+  "homepage": "https://github.com/fumit35/node.js_choNyumon_secondEdition#readme",
+  "dependencies": {
+    "ejs": "^2.6.1"
+  }
+}
