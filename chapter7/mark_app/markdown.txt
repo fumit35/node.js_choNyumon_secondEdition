@@ -1,0 +1,107 @@
+npm install --save express-session
+npm install --save express-validator
+npm install --save mysql
+npm install --save knex@0.14.6 -exact
+npm install --save bookshelf
+npm install --save markdown-it
+
+index.ejs
+フォームはactin="/"というようにトップページにそのままPOST送信するようにしてある。
+また中にはname = "find"という<input>タグを１つ用意してある。
+
+検索結果は、<ul>タグを使ったリストの形で表示している。
+ここでは、変数contentというものとして検索結果を渡すようにしてあるので、そこから
+オブジェクトを取り出し、その値を出力している。
+
+タイトルの表示部分は<a href="mark/<%content[i].id %>">というように
+リンクを用意してある。
+
+ここでは、/mark/○○というように、/mark/の後にデータのID番号をつけてアクセスすると、そのデータを
+表示するページが表示されるようになっている。そのアドレスへのリンクがhrefされている。
+
+mark.ejsの作成
+Markdownデータは、サーバー側でHTMLタグに変換され、それが変数contentに渡される。
+つまり<%-content %>がMarkdownの表示を行っている部分となる。
+
+このほか、sourceという変数で渡されたMarkdownのソースコードをそのまま<textarea>に
+表示している。これでフォームを送信し、内容を更新できるようにしようとしている。
+
+index.js
+普通にアクセスしたときにはmarkdownの新しいもの最大10個までを表示する。
+
+new Markdata(['title']).orderBy('created_at','DESC')
+  .where('content','like','%'+ req.body.find + '%')
+  .fetch({withRelated:['user']})
+  .then((collection)=>{
+    var data = {
+      title : 'Markdown Serch',
+      login:req.session.login,
+      message:'※"' + req.body.find + '"で検索された最近の投稿データ',
+      form:req.body,
+      content:collection.toArray()
+    };
+    res.render('index',data);
+  });
+
+orderBy
+create_atを基準に、新しい作成日のものから並び替える。
+
+where
+user_idがreq.session.login.idと同じである条件設定。
+これにより、ログインしているユーザーが投稿したものだけが検索される。
+
+fetchPage
+最大10項目表示する、というのは、つまり「ページに表示する数が10個の最初のページ」と
+考えればよい。それで、page:1,pageSize:10を指定してfetchPageしている。また、
+念のためにwithRelated:['user']でusersテーブルを関連付けてある。
+
+検索テキストを含むレコードの取得
+POST送信した際の処理は、送られた検索テキストをもとに、それをMarkDownのドキュメント内に
+もっているものだけを表示しないといけない。それは下記のようになっている。
+
+new Markdata(['title']).orderBy('created_at','DESC')
+.where('content','like','%'+ req.body.find + '%')
+.fetch({withRelated:['user']})
+.then((collection)=>{
+
+whereを使い、.where('content','like','%'+ req.body.find + '%')というように
+検索条件を設定してある。「like」は曖昧検索となる。%･･･%は%が着いているところにどんな
+テキストがあってもかまわない、ということを示す。
+
+ただし、これだとログインしたユーザー以外の者が登録したMarkDownのデータも探し出してしまう。
+これはテンプレート側で操作を行っている。レコードの内容を出力する繰り返しの部分で
+<% if(content[i].attributes.user_id != login.id){continue;}%>
+これで、content[i].attributes.user_idとlogin.idの値が等しくなかったら何もしないで
+次に進む。こうすることで、レコードのuser_idとログインしているユーザーのidが一致するものだけを
+表示している。
+
+データの取得
+クエリパラメータとして渡されたIDと、セッションに保管してあるloginのidを使い、レコードを検索。
+Markdata.query({where:{user_id:req.session.login.id}},
+        andWhere:{id:req.params.id}})
+queryメソッドが使われている。
+普通にwhereでIDを指定して検索し、見つかったレコードのuser_idがloginのidと同じかチェックしても良い。
+
+HTMLに変換する
+content:markdown.render(model.attributes.content),
+source:model.attriubtes.content
+HTMLへの変換はmarkdown-itのrenderというメソッドを呼び出すだけ。
+これでHTMLのコードに変換されたテキストが得られる。
+
+データの更新は?
+ここでは、フォームを送信するとそのレコードの内容を更新する。
+これは、router.post('/:id'～のところで行っている。
+var obj = new Markdata({id:req.params.id})
+    .save({content:req.body.source},{patch:true})
+new Markdataで、引数に{id:req.params.id}を指定してオブジェクトを作っている。
+これで、クエリパラメータで送られてきたIDのMarkdataオブジェクトを用意できる。
+といっても、これは実際にテーブルからレコードを取り出して作ったものではない。
+つまり、中身は空っぽ(idだけある)。
+これに、saveを使って保存を行わせる。ここでは、第一引数に{content:req.body.source}というように
+して、保存する内容を指定している。保存する項目名とそれに保存する値をオブジェクトに
+まとめている。
+そして第二引数には、{patch:true}というものが用意されている。
+これは、その部分だけの変更を許可するためのもの。これにより、レコードの一部だけを更新できるようになる。
+普通にデータの更新処理を考えると、「更新するレコードを検索して取り出し、その中身を変更して保存する」
+みたいなやり方を思い浮かべがち。がBookshelfならば、更新するIDのモデルをnewして作り、saveで変更するデータを
+指定するだけで、レコードの一部分だけを変更できる。

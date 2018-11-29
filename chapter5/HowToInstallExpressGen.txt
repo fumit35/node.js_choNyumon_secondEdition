@@ -1,0 +1,24 @@
+ExpressGeneratorをインストール
+npm install -g express-generator
+※C:\Users\Bungo\AppData\Roaming\npm\expressにインストール
+
+フォルダの作成、ファイルの自動生成
+※アプリを作成する場所に移動
+※フォルダごと作成するので不要
+express -e ex-gen-app
+
+
+cd ex-gen-app
+
+必要なパッケージ類を用意※用意されていないため
+npm install
+
+アプリケーションをスタートさせる
+node bin/www
+npm start
+
+
+
+express-session
+express-validator
+mysql

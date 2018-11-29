@@ -1,0 +1,68 @@
+npm install --save mysql
+
+<body>
+    <head>
+    <h1><%= title %></h1>
+    </head>
+    <div role = "main">
+    <table>
+    <% for(var i in content) %>
+    <tr>
+        <th><%=obj.id %></th>
+        <th><%=obj.name %></th>
+        <th><%=obj.mail %></th>
+        <th><%=obj.age %></th>
+    </tr>
+    <% } %>
+    </table>
+    </div>
+</body>
+
+Mysqlモジュールのロード
+var mysql = require('mysql');
+
+MySQLにアクセスする際に必要となる設定情報を変数にまとめている。
+var mysql_setting = {
+    host : 'localhost', //MySQLサーバーがあるホスト名
+    user : 'root', //データベースへのアクセスに用いるユーザー名。
+    password : '',　//アクセス時に用いるパスワード。
+    database : 'my-nodeapp-db'　//利用するデータベース名。
+    };
+
+コネクションというのは、データベースとの接続を管理するオブジェクト。
+var connection = mysql.createConnection(mysql_setting);
+このメソッドは、引数として、アクセスするデータベースに関数設定情報を
+まとめたもの。
+
+データベースの接続処理
+connection.connect();
+
+データを取り出す
+connection.query('SELECT * FROM mydata',･･･略･･･);
+データベースの問い合わせは、「query」メソッドを使う。
+
+第二引数は、コールバック関数となる。
+
+データベースアクセスには時間がかかる。
+このためqueryメソッドは非同期で実行されるようになっている。
+つまり、実行したら、サーバーからの返事を待たずにすぐに次に進むようになっている。
+そして、返事が返ってきたら、第二引数の関数を実行して受け取ったデータの処理をする。
+
+コールバック関数でデータを取得
+
+function(error,results,fields){
+    if(error == null){
+        var data = {title:'mysql',content:results};
+        res.render('hello',data);
+    }
+}
+error:発生したエラーの情報ががまとめられたもの
+results:クエリを実行して得られた値
+fields:取り出したフィールドに関する情報がまとめられたもの
+
+resultsを変数contentに設定してrenderを実行。
+
+接続を解除
+connection.end();
+
+query('Select * from mydata where id=?',id,･･････);

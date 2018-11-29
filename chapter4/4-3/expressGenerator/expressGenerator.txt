@@ -1,0 +1,278 @@
+Express Generatorをインストール
+npm install -g express-generator
+※Expressのアプリフォルダに移動する必要はない
+
+Express Generatorでアプリを作成
+Express -e ex-gen-app
+※アプリを作成する場所に移動
+
+実行方法
+express -e アプリケーション
+
+-eオプションについて
+「テンプレートエンジンにEJBを指定する」
+これを付けていないと「Pug(Jade)」というテンプレートエンジンが標準で設定される
+
+npm install
+cd ex-gen-appへ移動し上記コマンドを実行
+用意されているpackage.jsonを読み込み必要なパッケージを検索して全てインストールする。
+npm installですべての環境が整う。
+
+アプリケーションを実行
+node bin/www
+npm start
+
+「bin」フォルダ
+アプリケーションを実行するためのコマンドとなるファイルが保管されている
+「www」というファイルあ用意されておりアプリケーションするためのコマンド。
+
+「public」フォルダ
+公開ディレクトリ。Expressで作成したものと同じ。
+「image」「javascripts」「stylesheets」といったフォルダが用意されている。
+
+「routes」フォルダ
+ルートごとの処理用スクリプトファイルがまとめられている。
+用意されているページのアドレスごとにスクリプトファイルが作成されており、
+ここにファイルを追加することでルーティングを追加していくことができる。
+
+「views」フォルダ
+テンプレートファイルをまとめておくところ。.ejsなど
+
+「node_modules」フォルダ
+Node.jsのモジュール類がまとめられて保管されている。
+Express Generatorで利用する全パッケージがここにまとめられている。
+
+app.js
+これがメインプログラムとなる。アプリケーションの本体部分。
+
+package.json,package-lock.json
+npmのパッケージに関する情報を記述したもの。
+必要なライブラリ情報なども書かれている。
+package.jsonをもとに「npm install」で必要なパッケージをインストールしていた。
+package-lock.jsonはアップデートなどの際に使われる。
+
+■app.jsの中身
+1.必要なモジュールのロード
+2.ルート用スクリプトのロード
+3.Expressオブジェクトの作成と基本設定
+4.app.useによる関数組み込み
+5.アクセスするルートとエラー用のapp.use作成
+6.module.expressの設定
+
+■モジュールのロード
+'express-errors' Expressのエラーに関するもの
+'express'　Express本体
+'path' pathはファイルパスを扱うためのモジュール
+'morgan' HTTPリクエストのログ出力に関するモジュール
+'cookie-parser' クッキーのパース(値を変換する処理)に関するモジュール
+
+■ルート用スクリプトのロード
+var indexRouter = require('./routes/index');
+var indexRouter = require('./routes/users');
+
+「routes」フォルダの中にindex.jsとusers.jsというスクリプトファイルがあり、これらをロード。
+index.jsならば/indexにアクセスしたときの処理をまとめてある。
+
+手作業でExpressアプリを作ったときには1つのスクリプトファイルに全てを記述していた。
+Express Generetorではアプリで利用するアドレスごとに、そのアドレスに
+アクセスした際に実行するスクリプトをファイルとして用意するようになっている。
+そして、そのファイルをrequireでロードして、それぞれを割り当てるアドレスごとに呼び出されるように
+設定しておく。
+これらのスクリプトファイルは、app.js内にロードして使われることになる。
+つまりapp.jsと、「routes」内のindex.jsやusers.jsは1つのスクリプトファイルに書かれたのと
+同じように働くようになる。
+
+■Expressオブジェクトの作成と基本設定
+Expressのオブジェクトを作成し、基本設定を行う。
+
+var app = express();
+
+app.set('views',path.join(__dirname,'view'));
+app.set('views engine','ejs');
+
+app.setはアプリケーションで必要とする各種の設定情報をセットするためのもの。
+ここでは「views」と「view engine」という値を設定している。
+
+これは、それぞれ「テンプレートファイルが保管されてる場所」「テンプレートエンジンの種類」を示すもの。
+これでテンプレート関係の設定を行っている。
+
+■app.useによる関数組み込み
+app.useを使い、アプリケーションに必要な処理の組み込みを行っていく。」
+これらは、先ほどrequireでロードしたモジュールの機能を呼び出すようにしてある。
+
+app.use(logger('dev'));
+app.use(express.json);
+app.use(express.urlencoded({extended:false}));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname,'public')));
+
+このapp.useは、アプリケーションで利用する関数を設定するためのもの。
+このapp.useはアプリケーションにアクセスした際に実行される処理を組み込むためのもの。
+これらを組み込むことによってWebページにアクセスした際の基本的な処理がおこなわれるようになっている。
+
+■アクセスのためのapp.use作成
+app.use('/',indexRouter);
+app.use('/users',userRouter);
+
+app.use((req,res,next)=>{･･･中略･･･});
+app.use((err,req,res,next)=>{･･･中略･･･});
+
+ここでは'/'と'/users'に、それぞれindexとusersを割り当てている。
+これらは先ほど、requireでロードしたもの。「routes」フォルダ内のindex.jsとusers.jsの内容を
+保管している変数。
+
+その後にある2つは、エラーなどが発生したときの処理を担当する関数の設定。
+
+■module.expressの設定
+module.exports = app;
+
+app刃expressオブジェクトが入った変数。
+これをmoduleというモジュール管理のオブジェクトの「exports」という
+プロパティに設定する。
+
+このexportsというのは、外部からアクセスに関するもので、こうすることで設定したオブジェクトが外部から
+アクセスできるようになる。
+これは「Express Generatorのスクリプトで最後に必ずやっておくおなじない」のようなもの。
+
+■index.jsについて
+ルーティングして割り出されたアドレスごとの処理を記述。
+app.jsの中で、app.use('/',index);というようにして、'/'にアクセスすたら実行されるように設定されている。
+
+var express = require('express');
+var router = express.Router();
+
+/*GET home page.*/
+router.get('/',(req,res,next) => {
+    res.rendar('index',{title:'Express'});
+});
+
+module.exports = router;
+
+require('express');でExpressをロードした後、「Router」というメソッドを呼び出している。
+これは、Routerオブジェクトを生成するもので、ルーティングに関する機能をまとめたもの。
+ここでは、router.getというメソッドで、'/'にアクセスした際の表示(res.rendarでレンダリングする)を
+行っている。
+先に手作業でスクリプトを一から書いた際、app.getでGETアクセスの処理を設定していましたが、
+あれと同様のもの。Expressでは、Routerオブジェクトの「get」メソッドで、GETアクセスの処理を設定する。
+
+使い方は
+router.get(アドレス,関数);
+このような形になる。
+同様にPOST処理を行う「post」メソッドも用意されている。
+関数内で行っているのは、requestの「render」でレンダリングを行う作業。
+res.render('index',{title:'Express'});
+
+'index'はapp.js内でrequire('./routes/index')で読み込んだindex.ejsテンプレートの内容が
+収められている。このindex.jsも、app.js内からロードされて動いている
+(つまり、app.jsと1つのファイルにかかれているように働く)
+app.jsにロードされているわけなので、app.js内の変数などもそのまま利用できる。
+そして最後にmodule.exportsにrouterを設定して作業完了。
+
+■wwwコマンドについて
+「bin」内に「www」というファイルについて。
+これはプログラムを実行するためのコマンドのような役割を果たしている。
+
+#!/usr/bin/env node
+
+var app = require('../app');
+var debug = require('debug')('ex-gen-app:server');
+var http = require('http');
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port',port);
+
+var server = http.createServer(app);
+
+server.listen(port);
+server.on('error',onError);
+server.on('listening',onListening);
+
+app.jsとex-gen-app:server,httpといったモジュールをロードしている。
+そして、ポート番号を示す値を設定し、createServerでサーバーを実行。
+
+引数にappという変数がしていされているが、これは「createServerでサーバーを作り、
+appを実行する」という働きをする。
+後は、listenで待ちうけ状態にしておき、serverの「on」を使ってイベントの処理を
+設定する。ここではerrorとlisteningという2つのイベントを設定している。
+これでエラー時と待ち受け状態のときの処理を行うようにしている。
+
+基本的な処理の流れは、Expressを使わない、素のNode.jsでアプリケーションを
+使ったときに書いたので見覚えがあるでしょう(onによるイベント処理は別ですが)。まぁ、
+この部分は、実際に何か修正したりすることはないので、「そんなものがあるらしい」という程度に
+考えておけば十分。
+
+app.jsと「routes」内スクリプトの役割分け
+
+www
+ただプログラムを実行するためのもの。
+実際にサーバーが起動したあとのことは何もしていない。
+
+app.js
+Webアプリケーション本体に設定に関するもの。実行するアプリケーションの
+基本設定などを行う。
+
+routes内のスクリプト
+実際に特定のアドレスにアクセスしたときの処理は、「routes」内に
+用意したスクリプトの中に用意する。
+
+重要なのはapp.jsと「routes」内に用意するスクリプトファイルだけ。
+
+Webページを追加してみる
+Express Generatorによるアプリケーションでは、Webページは2つのファイルで
+構成されている。テンプレートとスクリプト。
+
+viewsフォルダの中にテンプレートファイルを作成。
+hello.ejs
+
+router.getと相対アドレス
+res.renderの第二引数には、titleとcontentの2つの値をわたすので、
+わかりやすいように変数dataというものにデータを用意し、
+それをrenderの引数に指定するようにしてある。
+
+app.useとrouter.getの役割
+今回、注意しておきたいのは、router.getの第一引数。
+ここでは、'/'としてある。
+これを見て、「あれ、/helloにアクセスするのだから、'/hello'じゃないのか?」と
+思っていることでしょう。
+まず、「アドレスと、呼び出されるスクリプトの設定は、app.jsで既に行われている」という
+ことを思い出して下さい。app.jsでは、
+app.use('/hello',hello);
+このように設定を追記していました。これで、'/hello'にアクセスされたらhelloが
+呼び出されるようになっています。
+では、hello.js内にあるrouter.get('/',･･･);というメソッドの'/'は何なのか。これは
+app.jsで設定された'/hello'以降のアドレスを設定するものです。つまりrouter.get('/',･･･);は
+/hello/にアクセスした際の処理となる。
+router.getでは、/hello以下の相対アドレスを設定するのです。
+
+router.get('/ok',･･･);→'/hello/ok'のGET処理
+
+「/helloアドレス下の処理は、hello.jsですべて対応する」ということ。
+app.jsのapp.useと、「routes」内のスクリプトのrouterは、こんな具合を担当している。
+
+この章のまとめ
+Expressの基本手順を理解する
+1.expressオブジェクトの用意
+2.appオブジェクトの作成
+3.ルートの設定
+4.待ち受け開始
+
+requireでexpressオブジェクトをロードし、appオブジェクトを作り、
+app.getなどでルートを設定し、listenで待ち受けを開始する。
+
+app.jsと「routes」の役割
+app.jsと、「routes」内に用意したスクリプトファイルがどのように役割を分けて連携し動いているか、
+という「Expressの基本的な仕組み」を理解する。
+
+「routes」内にhello.jsを作成し、そこでrouterオブジェクトを使った処理を用意する。
+そして、app.jsでhello.jsをロードし、/helloに割り当てる。
+
+
+
+
+
+
+
+
+
+
+

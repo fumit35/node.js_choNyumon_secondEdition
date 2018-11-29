@@ -1,0 +1,143 @@
+npm install --save knex@0.14.6 -exact
+npm install --save bookshelf
+npm uninstall bookshelf
+
+インストールしたモジュール
+express-session
+express-validator
+mysql
+knex
+bookshelf
+
+<% for(var i in collection) {%>
+    <%-include('data_item',{val:collection[i]})%>
+<%}%>
+collectionというのが、JavaScript側から渡されるデータのオブジェクト。
+これは配列になっていて、繰り返しで順にレコードのデータを取り出していける。
+
+この中では、data_item.ejsをincludeで読み込み、collection[i]のオブジェクトを
+変数valに渡して、その内容を表示するようにしてある。
+
+
+<% if(val != null){ %>
+    <tr>
+        <th style="width:100px;">
+            <a class="home" href="/home/<%val.attributes.user_id %>/1">
+                <%val.relations.user.attributes.name %>
+            </a>
+        </th>
+        <td>
+            <%=val.attributes.message %>
+        </td>
+        <%
+            var d = new Date(val.attributes.created_at);
+            var dstr = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getData()
+            + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.setSeconds();
+        %>
+        <td style="width:150px;">
+            <%=dstr %>    
+        </td>
+    </tr>
+<% } %>
+検索されたレコードの情報は、valという変数に入れて渡される。
+そこで、例えば、val.attributes.messageというようにすれば、送信されたメッセージの
+値がわかる。
+投稿したユーザの名前は、val.relations.user.attributes.nameというようにして
+記述してある。messageテーブルには、ユーザの名前などの項目はない。それはusersのほう。
+
+これは、「アソシエーション」という機能を使ったもの。
+アソシエーションは、複数のテーブルを関連付け、レコードを取得する際に関連するほかのテーブルの
+レコードも一緒に取り出せるようにする機能。
+取り出した関連レコードは、val.relationsというところにまとめられる。
+ここでは、この中からusersの値を取り出していた。
+
+アソシエーションの利用
+Bookshelfを利用してデータベースにアクセスをしている。
+最初に、テーブルにアクセスする「モデル」を作っている。
+var Message = Bookshelf.Model.extend({
+  tableName:'message',
+  hasTimeStamps:true,
+  user:function(){
+    return this.belongsTo(User);
+  }
+});
+これは、「messsage」モデルを作成しているところ。ここでは、
+tableName(テーブル名)のほかに、2つの項目が用意されている。
+
+hasTimeStamps
+これは、「タイムスタンプのデータをレコードに追加するもの」
+trueだと、レコードを保存する際にcreate_atという項目に現在の日時が、
+また内容を更新した際にはupdate_atという項目にその日時が自動的に保存
+されるようになる。
+これらの値は、DATATIMEというタイプの値として管理されている。
+
+user
+これは、「user」というプロパティを追加するためのもの。
+ここには関数が設定されている。
+
+belongsTo
+これはアソシエーションと呼ばれるもののひとつ。
+アソシエーションというのは、2つのテーブルのレコードを関連付けるための仕組み。
+「テーブルに用意された、関連テーブルのIDを示す値を使って、
+別のテーブルのレコードを一緒に取り出す」というもの。
+先にテーブルを作成したとき、「user_id」という項目を用意してあり、
+アソシエーションでは、このように「テーブル名_id」という名前の項目を用意し、
+その値を使って関連するレコードを取り出せるようにします。
+(テーブル名_idですが、users_idではなく、user_idとなる点に注意。
+必ず単数形に_idを付ける。)
+
+アソシエーションを使ったレコードの取得
+new Message().orderBy('create_at','DESC')
+    .fetchPage({page:pg,pageSize:10,withRelated:['users']})
+    .then((collection)=>{･･･略･･･}
+
+orderByについて
+orderBy('created_at','DESC')
+レコード並び替えをするためのメソッド。
+第一引数にフィールド名、第二引数には「ASC」「DESC」のいずれかを指定。
+ASCなら昇順、DESCなら降順。
+
+アソシエーションの設定
+その後で、fetchPageを使って指定のページのレコードを取り出している。
+ここで、引数で渡しているオブジェクト
+withRelated:['user']
+これが、関連付けるテーブル名を指定するもの。
+これを用意することで、関連するusersテーブルのレコードが一緒に取り出せるようになる。
+取り出されるレコードは、やはりモデルのオブジェクトになる。
+
+取得されるレコードの保管場所
+こうして取り出されるアソシエーションしたレコードのモデルは、
+collectionで得られるモデルの「relations」プロパティの中に、
+テーブル名ごとに保管される。
+例えば今回ならば、relations.userというところに保管されている。
+先にレコードの内容を表示するためのdata_item.ejsを作成した際、
+
+<%= val.relations.user.attributes.name %>
+
+これで、モデルに関連する他のテーブルのモデルが利用できるようになる。
+
+users.js
+queryで複数項目でチェックする
+ログインチェック部分
+フォームを送信したら、router.post('/')のところで、送られた名前とパスワードが正しいか
+チェックを行う。
+これは、nameが入力した名前、passwordが入力したパスワードであるレコードを
+検索する。もしそれが見つかれば、「既にその内容で登録されている」ということがわかる。
+もし見つけられなかったら、名前かパスワードが間違っている。
+では、nameとpasswordの両方の値をチェックして検索するのはどうするか。
+ここではqueryメソッドを使っている。
+
+User.query({where:{name:nm},andWhere:{password:pw}})
+.fetch()
+.then();
+このqueryは、より細かな条件の設定などを行うのに利用される。
+ここでは、引数にオブジェクトが用意されていおり、
+その中に以下の2つのオブジェクトが更に組み込まれている。
+
+where:{name:nm} nameの値が変数nmである
+andwhere:{password:pw} それに加えて、passwordの値が変数pwである
+
+「andWhere」
+これは「論理積」
+既にある条件と、更に追加した条件の両方が合致するものだけを検索する。
+これとは別に「orWhere」というものものある。こちらは「論理和」。

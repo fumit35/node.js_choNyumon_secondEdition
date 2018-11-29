@@ -1,0 +1,7 @@
+npmの初期化
+npm init
+-> package.jasonを作成する
+
+expressのインストール
+npm install --save express
+-> node_modulesを作成する

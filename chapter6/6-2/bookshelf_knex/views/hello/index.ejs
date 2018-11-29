@@ -1,0 +1,36 @@
+<!-- 表示したいものをviewsに置く -->
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta http-equiv="content-type"
+            conten="text/html; charset=UTF-8">
+            <title><%=title %></title>
+            <!-- <script src="https://code.jquery.com/jquery.min.js"></script> -->
+            <link rel='stylesheet' href='/stylesheets/style.css' />
+    </head>
+    <body>
+        <head>
+            <h1><%=title %></h1>
+        </head>
+        <div role="main">
+            <table>
+                <% for(var i in content) {%>
+                    <tr>
+                        <% var obj = content[i].attributes; %>
+                        <td><%=obj.id %></td>
+                        <td><%=obj.name %></td>
+                        <td><%=obj.mail %></td>
+                        <td><%=obj.age %></td>
+                    </tr>
+                <% } %>
+            </table>
+        </div>
+        <div>
+            <span><a href="/hello/1">&lt;&lt; First</a></span>
+            <span><a href="/hello/<%=pagination.page -1 %>">&lt;&lt; prev</a></span>
+            <span><a href="/hello/<%=pagination.page +1 %>">next &gt;&gt;</a></span>
+            <span><a href="/hello/<%=pagination.pageCount %>">last &gt;&gt;</a></span>
+        </div>
+        </body>
+</html>
+

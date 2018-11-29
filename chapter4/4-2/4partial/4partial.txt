@@ -1,0 +1,4 @@
+render時に変数dataをそのままdataという名前で渡している。
+パーシャルの名前を渡しているfilenameがない。
+Expressでは、filenameの指定は不要。
+ただテンプレート側でincludeすればいつでもパーシャルを利用できます。

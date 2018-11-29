@@ -1,0 +1,18 @@
+var url_parts = url.parse(request.url,true);
+parseの第二引数にtrueをつけることによって、
+クエリパラメーターとして追加されている部分もパース処理されるようになる。
+
+var query = url_parts.query;
+queryというパラメータのオブジェクトが保管されている。
+
+http://localhost:3000/?msg=hello
+{'msg'='hello'}
+trueをつけないとqueryの値は'msg=hello'というただのテキストになる。
+
+if(query.msg != undefined){
+    var query_obj = 
+    content += 'あなたは、「' + query.msg + '」と送りました。';
+}
+
+複数のパラメーターを用意する場合
+/?a=1&b=2&C=3･･･

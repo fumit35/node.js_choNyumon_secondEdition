@@ -1,0 +1,58 @@
+フォームの送信などと異なり、ページ移動などを行わず、
+その場でサーバーからデータだけを取り出せるため
+ユーザーから見ても違和感なく表示の更新などが行える。
+
+Ajaxを利用してサーバーからデータを取り出す場合、
+クライアント側(Webページ側)と、アクセスするサーバー側の両方で処理を用意する必要がある。
+どちらもJavascriptだが、サーバー側はNode.jsのコード、クライアント側はWebブラウザのコードであり、
+処理の内容も違っている。
+
+JSONデータを出力する
+dataという変数にデータを用意しておき、アクセス時に送られてきたクエリパラメーターの
+値をもとに、必要なデータを取り出して出力。
+出力する部分は、router.get('/',･･･);の部分に関数に用意してある。
+
+var n = req.query.id;
+res.json(data[n]);
+
+req.query.idで、送られてきたクエリパラメーター「id」の値を取り出している。
+そしてdataからどの番号の値を取り出し出力するが、ここでは「req.json」というメソッドを
+使っている。
+これはJavascriptのオブジェクトをJson形式でデータを出力するメソッド。
+こうすることでJSONを利用してJavascriptのオブジェクトを渡せるようにした。
+
+app.jsで/ajaxを用意する
+
+var ajax = require('./routes/ajax');
+app.use('/ajax',ajax);
+これらは、requireとapp.useが書かれているあたりに記述
+app.use(express.static(path.join(__dirname,'public')));
+
+この2行は、「routes」内に用意したajax.jsをロードし、/ajaxに割り当てるもの。
+
+jQueryでAjaxを利用する
+
+jQueryによりAjax通信
+$.getJSON("/ajax?id=" + n,function(json){･･･});
+このgetJSONは,第一引数のアドレスにAjax通信し、通信が完了したら
+第二引数のコールバック関数を実行する。
+このコールバック関数にはjsonという引数があるが、
+これが受け取ったJavaScriptオブジェクトとなる。
+getJSONは、Ajax通信でJSON形式のデータを受け取り、そのオブジェクトを
+コールバック関数に渡して処理をする。
+コールバック関数のjsonという引数は、受け取ったJSONデータから生成されたJavaScriptオブジェクト。
+オブジェクトになっているため後はそこから必要な値を取り出して利用できる。
+
+最新のjQueryを使うには?
+jQuery本体をnpmインストールすることも可能。
+npm install --save jQueryでAjaxを利用する
+node_modules内のjqueryフォルダ内のdist内にjquery.min.jsを利用するのが一般的。
+このファイルをコピーし、アプリケーションフォルダ内のpublicフォルダの中にある
+javascriptsフォルダの中にペーストしてファイルを入れる。
+
+以下のようなタグをEJSのテンプレートファイル内に用意しておく。
+<script src = "javaascripts/jquery.min.js"></script>
+
+
+
+

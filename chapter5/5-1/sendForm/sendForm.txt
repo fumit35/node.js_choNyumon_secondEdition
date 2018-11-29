@@ -1,0 +1,17 @@
+フォームの送信について
+Expressで一からファイルを作成したときに、「Body Parser」というモジュールを
+インストールした利用。
+Express Generatorで作成されたアプリでは､標準でBody Parserが
+組み込み済みになっている。
+
+送信先は、/hello/postが送信先にされている。
+hello.js内に、/postにPOST送信したときの処理を用意。
+
+req.bodyから値を取り出す
+router.post('post',･･･);
+「post」メソッドは、POSTアクセスの処理を行うためのものになる。
+
+var msg = req.body['message'];
+
+POST送信された値は、req.bodyにまとめられている。
+ここから値を取り出して処理を行う。

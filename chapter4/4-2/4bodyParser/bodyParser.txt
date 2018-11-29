@@ -1,0 +1,23 @@
+Body Parserによるフォームの処理
+
+var bodyParser = require('body-parser');
+
+urlencodedを設定する
+app.use(bodyParser.urlencoede({extended:false}));
+
+urlencodedは、URLエンコードされたボディを返す。
+これにより、送信されたフォームの内容が変換されて取り出されるようになる。
+
+引数に{extended:false}という値
+これはquerystringを利用してエンコードすることを指定するもの
+フォームを書くときに必ず書くもの
+
+req.bodyから値を取り出す
+app.postのところで、送信された値を取り出し利用する
+
+var msg = 'This is ･･･' + req.body.message + '･･･';
+req.body.messageというのが<input type="text" name="message">で送られた値。
+Body Parserの働きにより、フォームの値は、reqオブジェクトの「body」というプロパティ
+にまとめられる。ここから取り出したい値のプロパティを調べればいい。
+ここではname="message"となっているためreq.body.messageで値が取り出せた。
+

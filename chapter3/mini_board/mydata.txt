@@ -1,0 +1,10 @@
+{"id":"bingo","msg":"aaaaa"}
+{"id":"bingo","msg":"aaaaa"}
+{"id":"bingo","msg":"aaaaa"}
+{"id":"bingo","msg":"aaaaa"}
+{"id":"bingo","msg":"aaaaa"}
+{"id":"bingo","msg":"aaaaa"}
+{"id":"bingo","msg":"aaaaa"}
+{"id":"bungo","msg":"456"}
+{"id":"bungo","msg":"456"}
+{"id":"bungo","msg":"34567"}

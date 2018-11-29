@@ -1,0 +1,68 @@
+クッキーはヘッダー情報としてやり取りされている
+クッキーを利用するためには、ヘッダー情報のやり取りをしなければいけない。
+クッキーには日本語など直接保管できない。クッキーは保管できる値の種類が限られている。
+特殊な形式に変換して保管して、取り出したらまた変換して元のテキストに戻してやらないといけない。
+
+
+【クッキーへの保存】
+function setCookie(key,value,response){
+    ･･･
+}
+クッキーはヘッダー情報として送信する。
+responseのsetHeaderを利用する。
+
+クッキーに値を保存するには、まず保存する値を「エスケープ処理」する。
+クッキーに保存できる形式に変換する処理をする。
+var cookie = escape(Value);
+
+クッキーのヘッダー情報は、「set-Cookie」という名前で設定されている。
+第二引数には値が用意されている。これは配列になっている。['キー=値','キー=値','キー=値']
+response.setHeader('Set-Cookie',[key + '=' + cookie]);
+
+クッキーは、それぞれ名前(キー)とそれに設定される値がセットになっている。
+これらは、キー=値というように、イコールでつなげたテキストとして用意される。
+
+こうして用意した配列をSet-Cooieの値に用意し、setHeaderすれば、それがクッキーとして
+ヘッダー情報に追加されてクライアントへ送られる。
+
+サーバー側でset-Cookieでクッキーの準備
+↓
+responseのsetHeaderでクライアントに送信
+
+【クッキーから値を取り出す】
+['キー=値','キー=値','キー=値']
+実際→キー=値;キー=値;キー=値;キー=値;
+
+cookieから値を取り出す
+functiongetCookie(key,request){
+        ･･･
+}
+クライアントから送られてくるクッキー情報は、requestから取り出す。
+そこで、取り出すキーとrequestを引数で渡すようにしてある。
+
+var cookie_data = request.headers.cookie != undefined ? request.header.cookie:'';
+三項演算子
+変数 = 条件 ? trueの値:falseの値;
+
+request.headers.cookie→クッキーが保管されている場所
+cookieの値がundefinedでないならクッキーの値を取り出し、
+そうでない場合は空のテキストを返すようにしてある。
+
+クッキーを分解する
+var data = cookie_data.split(';');
+split
+cookie_dataのテキストをセミコロンで分割し
+配列にまとめたものが得られる。
+
+for(var i in data){
+    if(data[i].trim().startsWith(key + '=')){
+        var result = data[i].trim().substring(key.length + 1);
+        return unescape(result);
+    }
+}
+
+data[i].trim().startsWith(key + '=')
+data[i]のテキストをトリム(前後の余白を取り除く)し、startsWithでkey + '='というテキストではじめっているかどうかをチェックする。
+substringを使って'キー='の後のテキスト部分を取り出し、unescape関数を使って
+アンエスケープ(クッキーの形式から普通のテキストに戻す処理)をしてreturnする。
+

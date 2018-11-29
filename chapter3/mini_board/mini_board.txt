@@ -1,0 +1,149 @@
+var id = localStorage.getItem('id');
+
+        //変数 = localStorage.getItem(キー);
+        //このように、引数に「キー」を指定して呼び出す。
+        //このキーというのは、要するに値につけてある「名前」のこと。
+        //ローカルストレージは様々な値に名前をつけて保存する。そして、
+        //取り出すときは「この名前の値を下さい」と要求すれば指定の値を取り出せるようになっている。
+
+localStorage ローカルストレージを扱うために用意されているオブジェクト
+
+if (id==null){
+    location.href = './login';
+}
+
+getItem('id')で「id」というキーの値を取り出している。
+そして値がまだなければ、IDが未登録と判断し、ログインページに移動する。
+
+location.href 現在開いているページ
+
+【IDを非表示フィールドに設定する】
+document.querySelector('#id').textContent = 'ID:' + id;
+document.querySelector('#id_input').value = id;
+
+IDを表示するための<span>タグと、非表示フィールドのvalue。
+
+1行目は、<span id="id">のタグに「ID:○○」という形でテキスト表示させるもの。
+
+2行目は<form>内にある、
+<input type="hidden" id="id_input" name="id" value="">
+このタグのvalueに値を設定している。この非表示フィールドは、
+フォームを送信するときに、IDの値を一緒に送るために用意してあるもの。
+ローカルストレージはクライアント側の機能で、サーバ側では使えない。
+そこで、メッセージを送信する際、IDの値も一緒に送ることで、
+「なんというIDのクライアントが送信してきたか」をサーバー側に伝えるようにしていた。
+
+【メッセージをテーブルで表示する】
+<p><table style="width:85%;">
+    <% for(var i in data) { %>
+        <%- include('data_item',{val:data[i]}) %>
+    <% } %>
+</table></p>
+
+dataという変数が、メッセージのデータをまとめて保管している変数。
+これは各データを配列としてまとめている。
+ここから順に取り出し、includeを使って、data_item.ejsによる項目を作成。
+ここではvalという値を渡している。
+
+【パーシャル側の処理】
+<% if(val != ''){ %>
+
+JSONオブジェクトの生成
+ただvalで渡されたテキストを表示すればいいというわけではない。
+このデータテキストは「JSON形式で書かれた値」。
+値はテキストだが、このテキストは「オブジェクト」。
+利用の際には、このテキストを元にJavaScriptのオブジェクトを生成して、
+そこから必要な値を取り出して使うことになる。
+<% var obj=JSON.parse(val); %>
+
+JSONオブジェクトの「parse」は、引数のテキストをパース処理してオブジェクトを生成し返す。
+後は、このオブジェクトobjから必要な値を取り出して出力するだけ。
+<th style="width:100px;"><%= obj.id %></th><td><%= obj.msg %></td>
+
+【ローカルストレージに値を保存する】
+「IDを入力してもらい、それを保存すること」
+保存先はローカルストレージ。つまり、クライアント(webブラウザ)に保存することになる。
+ということは、このフォームはサーバーに送信しても意味がない。サーバーで処理するのではないから
+クライアントの中で、値の保存処理を用意しないといけない。
+<p><input type="text" id="id_input"></p>
+            <button onclick="setId();">送信</button>
+
+
+function setId(){
+    var id = document.querySelector('#id_input').value;
+    localStorage.setItem('id',id);
+    location.href='/';
+}
+
+「id_input」というIDのDOMオブジェクトからvalueの値を取り出し、
+それをローカルストレージに保存している。
+localStrage.setItem(キー,値);
+
+【スタイルシートとデータファイル】
+
+
+【ejsのインストール】
+cd Desktop
+cd mini_board
+npm install --save ejs
+
+
+ファイルのロード
+function readFromFIle(fname){
+    fs.readFile('fname','utf8',(err,data)=>{
+        message_data = data.split('\n');
+    })
+}
+fs.readFileで、指定の名前のファイルを読み込んでいるのがわかります。
+そのコールバック関数では、読み込んだデータ(data)のあとに「split」というものをつけて実行しています。
+これはテキスト(String)オブジェクトのメソッドで、そのテキストを引数の文字で分割し
+配列にしたものを返す。
+split('\n')により、fs.readFIleSyncで読み込んだテキストを\nという記号で分割し
+配列にしている。
+
+データの更新
+続いてフォームが送信され、その値をデータに追加する処理についてです。
+response_indexのrequestに追加されているendイベントでは、全部のデータを受け取ったら
+「addToData」というメソッドを呼び出しています。
+
+function addToData(id,msg,fname,request){･･･}
+ID,メッセージ,ファイル名,そしてrequestといったものが引数として渡されている。
+
+var obj = {'id' : id, 'msg' : msg};
+作成されたオブジェクトをJSON形式のテキストに変換。
+
+var obj_str = JSON.stringify(obj);
+JSONオブジェクトの「stringfy」というメソッドは、先に使ったparseと反対の働きをする。
+すなわち、引数に指定したJavascriptのオブジェクトをテキストに変換したものを返す。
+これで、objをテキストとして取り出せた。後は、これをmessage_dataに追加する。
+
+message_data.unshift(obj_str);
+
+ここでは、「unshift」というメソッドをつかっている。これは配列の最初に値を追加するもの。
+こうすることで、「最後に追加したものが最初に位置する」ようにしてある。
+
+追加したら、message_dataのデータ数がmax_num以上になっているかチェックし、もしそれ以上なら
+message_dataの最後のデータを削除している。
+
+if(message_data.length > max_num){
+    message_data.pop();
+}
+      shift  pop
+unshift→ \   / ←push
+a.shift();
+a.pop();
+
+配列を保存する
+message_dataは、テキストの配列。これを保存するには、配列を1つのテキストにまとめて、
+それを保存することになる。これを行っているのがsaveToFile関数。
+var data_str = message_data.join('\n');
+
+「join」は､配列を１つのテキストにまとめるもの。引数には、１つ１つの値の区切りとなるテキストを指定。
+ここでは「\n」を指定している。１つ１つの値を改行して１つのテキストにまとめたものがdata_strに設定される。
+
+後は、これをファイルに保存する。これが行うのが、fsオブジェクトの「writeFile」というメソッド。
+fs.writeFile(fname,data_str,(err) => {･･･});
+第一引数 保存するファイル名
+第二引数 保存するテキスト
+第三引数 保存後の処理
+このwriteFileも非同期で実行されるので、保存が完了したら第三引数のコールバック関数が実行される。
